@@ -1,7 +1,7 @@
 import argparse
 import socket
 import time
-from class_examples.UDP.constants import CHUNK_SIZE
+from constants import CHUNK_SIZE
 
 
 def get_timestamp():

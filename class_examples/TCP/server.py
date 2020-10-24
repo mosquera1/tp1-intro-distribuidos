@@ -1,7 +1,8 @@
 import argparse
 import socket
 import time
-from class_examples.TCP.constants import CHUNK_SIZE
+import os
+from constants import CHUNK_SIZE
 
 
 def get_timestamp():
@@ -50,6 +51,8 @@ def main():
         conn.send(str(bytes_received).encode())
 
         f.close()
+
+        os.remove(filename)
 
     sock.close()
 

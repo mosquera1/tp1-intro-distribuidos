@@ -1,7 +1,7 @@
 import os
 import argparse
 import socket
-from class_examples.UDP.constants import CHUNK_SIZE
+from constants import CHUNK_SIZE
 
 
 def parse_arguments():
