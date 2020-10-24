@@ -10,7 +10,7 @@ Los archivos [template-client.py](template-client.py) y [template-server.py](tem
 
 ## TCP
 
-Los archivos [tcp-client.py](tcp-client.py) y [tcp-server.py](tcp-server.py) proveen una implementación de ejemplo del sistema de intercambio de archivos, utilizando el protocolo TCP para la comunicación entre el cliente y el servidor.
+Los archivos [tcp-client.py](class_examples/TCP/client.py) y [tcp-server.py](class_examples/TCP/server.py) proveen una implementación de ejemplo del sistema de intercambio de archivos, utilizando el protocolo TCP para la comunicación entre el cliente y el servidor.
 
 ### Corriendo el servidor
 
@@ -35,7 +35,7 @@ En el repo esta incluido un archivo de ejemplo, por lo que, para utilizar ese ar
 
 ## UDP
 
-Los archivos [udp-client.py](udp-client.py) y [udp-server.py](udp-server.py) proveen una implementación de ejemplo del sistema de intercambio de archivos, utilizando el protocolo UDP para la comunicación entre el cliente y el servidor.
+Los archivos [udp-client.py](class_examples/UDP/client.py) y [udp-server.py](class_examples/UDP/server.py) proveen una implementación de ejemplo del sistema de intercambio de archivos, utilizando el protocolo UDP para la comunicación entre el cliente y el servidor.
 
 ### Corriendo el servidor
 
