@@ -1,7 +1,7 @@
 import argparse
-import socket
-import time
-import os
+
+app_version = "1.0.0"
+app_name = "Ping application"
 
 help_base_text = '''usage : tp_ping . py [ - h ] [ - v | -q ] [ - s ADDR ] [ - p | -r | -x ] [ - c COUNT ] [ - d ADDR ]
 
@@ -29,7 +29,7 @@ proxy_ping_help_text = help_base_text.format(
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser("Ping application", add_help=False)
+    parser = argparse.ArgumentParser(app_name, add_help=False)
 
     parser.add_argument("-h", "--help", help="print this and exit", action="store_true")
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
@@ -52,11 +52,15 @@ def main():
         args.dest
     )
 
-    if print_help and (ping is False) and (reverse is False) and (proxy is False):
+    selected_types = sum([1 if x is True else 0 for x in (ping, reverse, proxy)])
+
+    has_error = (verbose and quiet)
+
+    if (ping is False) and (reverse is False) and (proxy is False) or (selected_types > 1):
         print(default_ping_help_text)
         exit(0)
 
-    if print_help is True:
+    if print_help is True or has_error is True:
         if ping:
             print(direct_ping_help_text)
             exit(0)
@@ -66,6 +70,8 @@ def main():
         if proxy:
             print(proxy_ping_help_text)
             exit(0)
+
+    print(app_name, app_version)
 
 
 if __name__ == "__main__":
