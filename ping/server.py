@@ -23,8 +23,11 @@ def start_server(log_level=logging.INFO, host="127.0.0.1", port=8080):
 
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
+    ch = logging.StreamHandler()
+    ch.setLevel(log_level)
 
     logger.addHandler(fh)
+    logger.addHandler(ch)
 
     address = (host, port)
 
@@ -32,7 +35,7 @@ def start_server(log_level=logging.INFO, host="127.0.0.1", port=8080):
     sock.bind(address)
 
     while True:
-        logger.info("loop")
+        logger.debug("server loop")
         data, addr = sock.recvfrom(CHUNK_SIZE)
         size = len(data.decode())
         logger.info("Incoming chunk with size {} from {}".format(size, addr))
@@ -42,7 +45,7 @@ def start_server(log_level=logging.INFO, host="127.0.0.1", port=8080):
         sock.sendto(b'start', addr)
 
         while bytes_received < size:
-            logger.info("inner loop, bytes: {}, size: {}".format(bytes_received, size))
+            logger.debug("server inner loop, bytes: {}, size: {}".format(bytes_received, size))
             data, addr = sock.recvfrom(CHUNK_SIZE)
             logger.info("Received chunk {} from".format(size, addr))
             bytes_received += len(data)

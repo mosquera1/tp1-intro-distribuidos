@@ -3,7 +3,6 @@ import socket
 import logging
 import signal
 import argparse
-from traceback import print_exception
 
 from send_chunk import send_chunk
 from constants import CHUNK, CHUNK_SIZE
@@ -52,6 +51,8 @@ def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_
     # Create socket and connect to server
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(own_address)
+    sock.setblocking(0)
+    sock.settimeout(0.5)
 
     i = 0
     logger.debug("count {}".format(count))
@@ -121,7 +122,8 @@ def main():
     args = parse_arguments()
 
     (print_help, verbose, quiet, server, count, ping, reverse, proxy, destination_ip, destination_port) = (
-        args.help, args.verbose, args.quiet, args.server, int(args.count), args.ping, args.reverse, args.proxy,
+        args.help, args.verbose, args.quiet, args.server, int(args.count) if not (args.count is None) else None,
+        args.ping, args.reverse, args.proxy,
         args.dest_ip, args.dest_port
     )
 
