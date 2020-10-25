@@ -20,37 +20,38 @@ def main():
     args = parse_arguments()
     server_address = (args.host, args.port)
     own_address = (args.own_host, args.own_port)
+    chunk = 'chunk'
 
-    f = open(args.file, "rb")
-    f.seek(0, os.SEEK_END)
-    size = f.tell()
-    f.seek(0, os.SEEK_SET)
+    # f = open(args.file, "rb")
+    # f.seek(0, os.SEEK_END)
+    # size = f.tell()
+    # f.seek(0, os.SEEK_SET)
 
-    print("Sending {} bytes from {}".format(size, args.file))
+    print("Sending {} bytes from {}".format(len(chunk), args.file))
 
     # Create socket and connect to server
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(own_address)
 
-    sock.sendto(str(size).encode(), server_address)
+    sock.sendto(str(len(chunk)).encode(), server_address)
     signal, addr = sock.recvfrom(CHUNK_SIZE)
 
     if signal.decode() != "start":
         print("There was an error on the server")
         return exit(1)
 
-    while True:
-        chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            break
-        sock.sendto(chunk, server_address)
+    # while True:
+        # chunk = f.read(CHUNK_SIZE)
+        # if not chunk:
+        #     break
+    sock.sendto(chunk.encode(), server_address)
 
     # Recv amount of data received by the server
     num_bytes, addr = sock.recvfrom(CHUNK_SIZE)
 
     print("Server received {} bytes".format(num_bytes.decode()))
 
-    f.close()
+    # f.close()
     sock.close()
 
 

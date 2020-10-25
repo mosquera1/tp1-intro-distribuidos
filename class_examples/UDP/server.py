@@ -25,7 +25,7 @@ def main():
     sock.bind(address)
 
     while True:
-        data, addr = sock.recvfrom(CHUNK_SIZE)
+        data, addr = sock.recvfrom(100000000)
         size = int(data.decode())
         print("Incoming file with size {} from {}".format(size, addr))
 
@@ -36,7 +36,7 @@ def main():
         sock.sendto(b'start', addr)
 
         while bytes_received < size:
-            data, addr = sock.recvfrom(CHUNK_SIZE)
+            data, addr = sock.recvfrom(100000000)
             bytes_received += len(data)
             f.write(data)
 
