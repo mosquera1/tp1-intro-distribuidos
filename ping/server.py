@@ -16,12 +16,12 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def start_server(log_level="INFO", host="127.0.0.1", port=8080):
+def start_server(log_level=logging.INFO, host="127.0.0.1", port=8080):
     logger = logging.getLogger('server')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(log_level)
 
     fh = logging.FileHandler('server.log')
-    fh.setLevel(logging.DEBUG)
+    fh.setLevel(log_level)
 
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
@@ -36,7 +36,7 @@ def start_server(log_level="INFO", host="127.0.0.1", port=8080):
     while True:
         data, addr = sock.recvfrom(CHUNK_SIZE)
         size = len(data.decode())
-        logger.debug("Incoming chunk with size {} from {}".format(size, addr))
+        logger.info("Incoming chunk with size {} from {}".format(size, addr))
 
         bytes_received = 0
 
@@ -44,6 +44,7 @@ def start_server(log_level="INFO", host="127.0.0.1", port=8080):
 
         while bytes_received < size:
             data, addr = sock.recvfrom(CHUNK_SIZE)
+            logger.debug("Received chunk {} from".format(size, addr))
             bytes_received += len(data)
 
         # Send number of bytes received
