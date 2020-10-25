@@ -9,6 +9,8 @@ def direct_ping(log_level="INFO", client_host="127.0.0.1", client_port=9000, ser
     try:
         os.remove('server.log')
         os.remove('client.log')
+    except FileNotFoundError:
+        pass
     finally:
         pass
 

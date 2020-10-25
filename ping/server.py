@@ -1,14 +1,10 @@
 import argparse
 import socket
 import time
-import os
 import logging
+import signal
 
 from constants import CHUNK_SIZE
-
-
-def get_timestamp():
-    return int(round(time.time() * 1000))
 
 
 def parse_arguments():
@@ -50,14 +46,10 @@ def start_server(log_level="INFO", host="127.0.0.1", port=8080):
             data, addr = sock.recvfrom(CHUNK_SIZE)
             bytes_received += len(data)
 
-
         # Send number of bytes received
         sock.sendto(str(bytes_received).encode(), addr)
 
         logger.debug("Sent {}".format(str(bytes_received).encode()))
-
-
-    sock.close()
 
 
 def main():
