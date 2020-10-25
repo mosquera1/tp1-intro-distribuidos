@@ -40,10 +40,8 @@ def start_server(log_level="INFO", host="127.0.0.1", port=8080):
     while True:
         data, addr = sock.recvfrom(CHUNK_SIZE)
         size = len(data.decode())
-        logger.debug("Incoming file with size {} from {}".format(size, addr))
+        logger.debug("Incoming chunk with size {} from {}".format(size, addr))
 
-        filename = "./file-{}.bin".format(get_timestamp())
-        f = open(filename, "wb")
         bytes_received = 0
 
         sock.sendto(b'start', addr)
@@ -51,15 +49,13 @@ def start_server(log_level="INFO", host="127.0.0.1", port=8080):
         while bytes_received < size:
             data, addr = sock.recvfrom(CHUNK_SIZE)
             bytes_received += len(data)
-            f.write(data)
 
-        logger.debug("Received file {}".format(filename))
 
         # Send number of bytes received
         sock.sendto(str(bytes_received).encode(), addr)
 
-        f.close()
-        os.remove(f.name)
+        logger.debug("Sent {}".format(str(bytes_received).encode()))
+
 
     sock.close()
 

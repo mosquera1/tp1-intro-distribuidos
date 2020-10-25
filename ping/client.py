@@ -39,14 +39,15 @@ def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_
             logger.debug("There was an error on the server")
             return exit(1)
 
-        while True:
-            sock.sendto(CHUNK, server_address)
-            time.sleep(1)
+        sock.sendto(CHUNK, server_address)
+        time.sleep(1)
 
         # Recv amount of data received by the server
         num_bytes, addr = sock.recvfrom(CHUNK_SIZE)
 
         logger.debug("Server received {} bytes".format(num_bytes.decode()))
+
+        i += 1
 
     f.close()
 
