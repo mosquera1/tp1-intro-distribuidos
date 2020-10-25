@@ -1,3 +1,4 @@
-import socket
-import time
-import os
+from client import start_client
+
+def direct_ping():
+    return

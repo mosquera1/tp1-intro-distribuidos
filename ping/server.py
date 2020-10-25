@@ -1,6 +1,7 @@
 import argparse
 import socket
 import time
+import os
 from constants import CHUNK_SIZE
 
 
@@ -46,6 +47,7 @@ def main():
         sock.sendto(str(bytes_received).encode(), addr)
 
         f.close()
+        os.remove(filename)
 
     sock.close()
 

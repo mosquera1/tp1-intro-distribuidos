@@ -1,4 +1,7 @@
 import argparse
+from direct_ping import direct_ping
+
+direct_ping()
 
 app_version = "1.0.0"
 app_name = "Ping application"
@@ -16,7 +19,8 @@ optional arguments :
 -p , -- ping direct ping
 -r , -- reverse reverse ping
 -x , -- proxy proxy pin
--d , -- dest destination IP address'''
+-d , -- dest-ip destination IP address
+-dp , -- dest-port destination port address'''
 
 default_ping_help_text = help_base_text.format(
     "no command selected")
@@ -39,7 +43,8 @@ def parse_arguments():
     parser.add_argument("-p", "--ping", help="direct ping", action="store_true")
     parser.add_argument("-r", "--reverse", help="reverse ping", action="store_true")
     parser.add_argument("-x", "--proxy", help="proxy pin", action="store_true")
-    parser.add_argument("-d", "--dest", help="destination IP address", default="127.0.0.1")
+    parser.add_argument("-d", "--dest-ip", help="destination IP address", default=None)
+    parser.add_argument("-dp", "--dest-port", help="destination Port address", default=None)
 
     return parser.parse_args()
 
@@ -47,14 +52,14 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    (print_help, verbose, quiet, server, count, ping, reverse, proxy, destination_ip) = (
+    (print_help, verbose, quiet, server, count, ping, reverse, proxy, destination_ip, destination_port) = (
         args.help, args.verbose, args.quiet, args.server, args.count, args.ping, args.reverse, args.proxy,
-        args.dest
+        args.dest_ip, args.dest_port
     )
 
     selected_types = sum([1 if x is True else 0 for x in (ping, reverse, proxy)])
 
-    has_error = (verbose and quiet)
+    has_error = (verbose and quiet) or (proxy and (destination_ip is None))
 
     if (ping is False) and (reverse is False) and (proxy is False) or (selected_types > 1):
         print(default_ping_help_text)

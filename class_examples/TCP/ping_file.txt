@@ -1,0 +1,1 @@
+64 byte string used for the echo request of the ping command :-D

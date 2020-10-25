@@ -1,32 +1,22 @@
 import os
-import argparse
+import pathlib
 import socket
 from constants import CHUNK_SIZE
 
 
-def parse_arguments():
-    parser = argparse.ArgumentParser()
+def start_client(log_level="default", host="127.0.0.1", port=8080, count=None, own_host="127.0.0.1", own_port=9000):
+    server_address = (host, port)
+    own_address = (own_host, own_port)
 
-    parser.add_argument("-f", "--file", help="the file to send", required=True)
-    parser.add_argument("-H", "--host", default="127.0.0.1")
-    parser.add_argument("-P", "--port", type=int, default="8080")
-    parser.add_argument("-O", "--own-host", default="127.0.0.1")
-    parser.add_argument("-p", "--own-port", type=int, default="8081")
+    root_dir = os.path.abspath(os.getcwd())
+    file = '/ping_file.txt'
 
-    return parser.parse_args()
-
-
-def start_client(verbose=False,quiet=False,):
-    args = parse_arguments()
-    server_address = (args.host, args.port)
-    own_address = (args.own_host, args.own_port)
-
-    f = open(args.file, "rb")
+    f = open(root_dir + file, "rb")
     f.seek(0, os.SEEK_END)
     size = f.tell()
     f.seek(0, os.SEEK_SET)
 
-    print("Sending {} bytes from {}".format(size, args.file))
+    print("Sending {} bytes from {}".format(size, file))
 
     # Create socket and connect to server
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -52,6 +42,10 @@ def start_client(verbose=False,quiet=False,):
 
     f.close()
     sock.close()
+
+
+def main():
+    start_client()
 
 
 if __name__ == "__main__":
