@@ -1,15 +1,20 @@
 import time
+import socket
 from constants import CHUNK, CHUNK_SIZE
 
 
 def send_chunk(logger, server_address, sock, i):
     start_time = time.time()
     logger.debug("Start loop {}".format(i))
-    sock.sendto(str(CHUNK).encode(), server_address)
-    signal, addr = sock.recvfrom(CHUNK_SIZE)
+    try:
+        sock.sendto(str(CHUNK).encode(), server_address)
+        signal, addr = sock.recvfrom(CHUNK_SIZE)
 
-    if signal.decode() != "start":
-        logger.debug("There was an error on the server")
+        if signal.decode() != "start":
+            logger.error("There was an error on the server")
+            exit(1)
+    except socket.error:
+        logger.error("couldn't connect to server")
         exit(1)
 
     sock.sendto(CHUNK, server_address)
