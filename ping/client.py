@@ -23,7 +23,7 @@ def signal_handler(_, __):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_host="127.0.0.1", own_port=9000):
+def start_client(log_level="INFO", host="127.0.0.1", port=80, count=None, own_host="127.0.0.1", own_port=9000):
     logger = logging.getLogger('client')
     logger.setLevel(logging.DEBUG)
 

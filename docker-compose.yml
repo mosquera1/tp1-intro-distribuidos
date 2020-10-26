@@ -1,0 +1,23 @@
+version: "3.7"
+
+# Using base extension fields to avoid extra repetition
+# See https://docs.docker.com/compose/compose-file/#extension-fields for details
+
+services:
+  server:
+    build: .
+    ports:
+      - "8080:8080/udp"
+    networks:
+      - default
+
+  client:
+    build: .
+    ports:
+      - "9000:9000/udp"
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
