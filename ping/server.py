@@ -45,9 +45,10 @@ def start_server(log_level=logging.INFO, host="127.0.0.1", port=8080):
         if command == "r":
             data, addr = sock.recvfrom(CHUNK_SIZE)
             count = data.decode()
+            print("addr", addr)
 
-            # direct(sock, logger)
-            pass
+            ping(count, {}, addr, sock, logger)
+            return
         elif command == "x":
             pass
 

@@ -5,7 +5,7 @@ import signal
 import argparse
 import statistics as st
 
-from common import ping
+from common import ping, direct_server
 from constants import CHUNK, CHUNK_SIZE
 
 statistics = {}
@@ -71,7 +71,17 @@ def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_
     if selected_type == "p":
         ping(count, statistics, server_address, sock, logger)
     elif selected_type == "r":
-        ping(count, statistics, server_address, sock, logger)
+        sock.sendto(str(0 if count is None else count).encode(), server_address)
+
+        i = 0
+        while count is None or i < count:
+            logger.debug("server loop")
+            data, addr = sock.recvfrom(CHUNK_SIZE)
+            try:
+                direct_server(sock, logger, data, addr)
+            except socket.error:
+                pass
+            i += 1
 
     print_statistics()
 
