@@ -37,24 +37,37 @@ def start_server(log_level=logging.INFO, host="127.0.0.1", port=8080):
     while True:
         logger.debug("server loop")
         data, addr = sock.recvfrom(CHUNK_SIZE)
-        size = len(data.decode())
-        logger.info("Incoming chunk with size {} from {}".format(size, addr))
 
-        bytes_received = 0
+        command = data.decode()
 
-        sock.sendto(b'start', addr)
+        if command == "r":
+            # direct(sock, logger)
+            pass
+        elif command == "x":
+            pass
 
-        while bytes_received < size:
-            logger.debug("server inner loop, bytes: {}, size: {}".format(bytes_received, size))
-            data, addr = sock.recvfrom(CHUNK_SIZE)
-            logger.info("Received chunk {} from".format(size, addr))
-            bytes_received += len(data)
+        direct(sock, logger, data, addr)
 
-        logger.info("bytes {}".format(str(bytes_received)))
-        # Send number of bytes received
-        sock.sendto(str(bytes_received).encode(), addr)
 
-        logger.info("Sent {}".format(str(bytes_received).encode()))
+def direct(sock, logger, data, addr):
+    size = len(data.decode())
+    logger.info("Incoming chunk with size {} from {}".format(size, addr))
+
+    bytes_received = 0
+
+    sock.sendto(b'start', addr)
+
+    while bytes_received < size:
+        logger.debug("server inner loop, bytes: {}, size: {}".format(bytes_received, size))
+        data, addr = sock.recvfrom(CHUNK_SIZE)
+        logger.info("Received chunk {} from".format(size, addr))
+        bytes_received += len(data)
+
+    logger.info("bytes {}".format(str(bytes_received)))
+    # Send number of bytes received
+    sock.sendto(str(bytes_received).encode(), addr)
+
+    logger.info("Sent {}".format(str(bytes_received).encode()))
 
 
 def main():

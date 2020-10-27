@@ -3,6 +3,7 @@ import socket
 import logging
 import signal
 import argparse
+import statistics as st
 
 from send_chunk import send_chunk
 from constants import CHUNK, CHUNK_SIZE
@@ -12,7 +13,16 @@ statistics = {}
 
 def print_statistics():
     print("----statistics-----")
-    print(statistics)
+
+    print("{} packets transmitted, {} received, {}% packet loss, time {} ms".format(statistics["count"],
+                                                                                    statistics["received"],
+                                                                                    round(statistics["lost"] /
+                                                                                          statistics["count"], 1),
+                                                                                    statistics["total_time"]))
+    print("rtt min/avg/max/mdev = {}/{}/{}/{} ms".format(min(statistics["times"]),
+                                                         round(sum(statistics["times"]) / len(statistics["times"]), 2),
+                                                         max(statistics["times"]),
+                                                         round(st.stdev(statistics["times"]), 4)))
 
 
 def signal_handler(_, __):
@@ -23,7 +33,8 @@ def signal_handler(_, __):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-def start_client(log_level="INFO", host="127.0.0.1", port=80, count=None, own_host="127.0.0.1", own_port=9000):
+def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_host="127.0.0.1", own_port=9000,
+                 selected_type="p"):
     logger = logging.getLogger('client')
     logger.setLevel(logging.DEBUG)
 
@@ -43,6 +54,8 @@ def start_client(log_level="INFO", host="127.0.0.1", port=80, count=None, own_ho
     server_address = (host, port)
     own_address = (own_host, own_port)
 
+    start_time = time.time()
+
     size = len(CHUNK)
     logger.info("PING {} with {} bytes of data".format(host, size))
     logger.info("Server address {}".format(host))
@@ -52,23 +65,37 @@ def start_client(log_level="INFO", host="127.0.0.1", port=80, count=None, own_ho
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(own_address)
     sock.setblocking(0)
-    sock.settimeout(0.5)
+    sock.settimeout(1)
 
     i = 0
     logger.debug("count {}".format(count))
+    statistics["lost"] = 0
+    statistics["times"] = []
+
+    if selected_type != "p":
+        sock.sendto(selected_type.encode(), server_address)
+
     while (count is None) or i < count:
+        logger.debug("client loop, i: {}".format(i))
         (received, elapsed_milliseconds) = send_chunk(logger, server_address, sock, i)
 
         if received < CHUNK_SIZE:
             statistics["lost"] += 1
+        else:
+            statistics["times"].append(elapsed_milliseconds)
 
         time.sleep(1)
         i += 1
 
+    sock.close()
+
+    elapsed_milliseconds = round((time.time() - start_time) * 1000, 1)
+
     statistics["count"] = i
     statistics["server"] = host
     statistics["received"] = i
-    sock.close()
+    statistics["total_time"] = elapsed_milliseconds
+
     print_statistics()
 
 
@@ -154,13 +181,15 @@ def main():
     elif quiet:
         log_level = logging.ERROR
 
-    if ping:
-        port = 9000
-        while port < 9010:
-            try:
-                return start_client(log_level=log_level, host=server, count=count, own_host="127.0.0.1", own_port=port)
-            except socket.error:
-                port += 1
+    selected_type = "p" if ping else "r" if reverse else "x"
+
+    port = 9000
+    while port < 9002:
+        try:
+            return start_client(log_level=log_level, host=server, count=count, own_host="127.0.0.1", own_port=port,
+                                selected_type=selected_type)
+        except socket.error:
+            port += 1
 
     # if reverse:
     #     return start_client(log_level=log_level, server=server, count=count, own_host="127.0.0.1", own_port=9000)
