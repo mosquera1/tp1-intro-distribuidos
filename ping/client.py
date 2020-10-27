@@ -5,7 +5,7 @@ import signal
 import argparse
 import statistics as st
 
-from send_chunk import send_chunk
+from common import ping
 from constants import CHUNK, CHUNK_SIZE
 
 statistics = {}
@@ -54,8 +54,6 @@ def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_
     server_address = (host, port)
     own_address = (own_host, own_port)
 
-    start_time = time.time()
-
     size = len(CHUNK)
     logger.info("PING {} with {} bytes of data".format(host, size))
     logger.info("Server address {}".format(host))
@@ -67,34 +65,13 @@ def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_
     sock.setblocking(0)
     sock.settimeout(1)
 
-    i = 0
-    logger.debug("count {}".format(count))
-    statistics["lost"] = 0
-    statistics["times"] = []
-
     if selected_type != "p":
         sock.sendto(selected_type.encode(), server_address)
 
-    while (count is None) or i < count:
-        logger.debug("client loop, i: {}".format(i))
-        (received, elapsed_milliseconds) = send_chunk(logger, server_address, sock, i)
-
-        if received < CHUNK_SIZE:
-            statistics["lost"] += 1
-        else:
-            statistics["times"].append(elapsed_milliseconds)
-
-        time.sleep(1)
-        i += 1
-
-    sock.close()
-
-    elapsed_milliseconds = round((time.time() - start_time) * 1000, 1)
-
-    statistics["count"] = i
-    statistics["server"] = host
-    statistics["received"] = i
-    statistics["total_time"] = elapsed_milliseconds
+    if selected_type == "p":
+        ping(count, statistics, server_address, sock, logger)
+    elif selected_type == "r":
+        ping(count, statistics, server_address, sock, logger)
 
     print_statistics()
 
