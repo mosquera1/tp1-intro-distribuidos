@@ -4,6 +4,7 @@ import logging
 import signal
 import argparse
 import statistics as st
+import json
 
 from common import ping, direct_server
 from constants import CHUNK, CHUNK_SIZE
@@ -35,6 +36,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_host="127.0.0.1", own_port=9000,
                  selected_type="p"):
+    global statistics
     logger = logging.getLogger('client')
     logger.setLevel(logging.DEBUG)
 
@@ -63,7 +65,7 @@ def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(own_address)
     sock.setblocking(0)
-    sock.settimeout(1)
+    sock.settimeout(3)
 
     if selected_type != "p":
         sock.sendto(selected_type.encode(), server_address)
@@ -71,17 +73,26 @@ def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_
     if selected_type == "p":
         ping(count, statistics, server_address, sock, logger)
     elif selected_type == "r":
+        logger.debug("Reverse")
         sock.sendto(str(0 if count is None else count).encode(), server_address)
 
         i = 0
         while count is None or i < count:
             logger.debug("server loop")
             data, addr = sock.recvfrom(CHUNK_SIZE)
+            logger.debug("server loop 2 {} {}".format(data, addr))
             try:
                 direct_server(sock, logger, data, addr)
             except socket.error:
                 pass
+            time.sleep(1)
             i += 1
+
+        data, addr = sock.recvfrom(1000000)
+        statistics = json.loads(data.decode())
+        logger.debug(statistics)
+
+    sock.close()
 
     print_statistics()
 

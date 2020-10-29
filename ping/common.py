@@ -5,7 +5,7 @@ from constants import CHUNK, CHUNK_SIZE
 
 def send_chunk(logger, server_address, sock, i):
     start_time = time.time()
-    logger.debug("Start loop {}".format(i))
+    logger.debug("Start loop {} to address {}".format(i, server_address))
     try:
         sock.sendto(str(CHUNK).encode(), server_address)
         signal, addr = sock.recvfrom(CHUNK_SIZE)
@@ -37,6 +37,8 @@ def send_chunk(logger, server_address, sock, i):
 def ping(count, statistics, server_address, sock, logger):
     start_time = time.time()
 
+    count = 0 if count is None else int(count)
+
     logger.debug("count {}".format(count))
     statistics["lost"] = 0
     statistics["times"] = []
@@ -54,8 +56,6 @@ def ping(count, statistics, server_address, sock, logger):
 
         time.sleep(1)
         i += 1
-
-    sock.close()
 
     elapsed_milliseconds = round((time.time() - start_time) * 1000, 1)
 
@@ -79,8 +79,8 @@ def direct_server(sock, logger, data, addr):
         logger.info("Received chunk {} from".format(size, addr))
         bytes_received += len(data)
 
-    logger.info("bytes {}".format(str(bytes_received)))
+    logger.debug("bytes {}".format(str(bytes_received)))
     # Send number of bytes received
     sock.sendto(str(bytes_received).encode(), addr)
 
-    logger.info("Sent {}".format(str(bytes_received).encode()))
+    logger.debug("Sent {}".format(str(bytes_received).encode()))

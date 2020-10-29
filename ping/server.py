@@ -1,7 +1,7 @@
 import argparse
 import socket
 import logging
-
+import json
 from common import ping, direct_server
 
 CHUNK_SIZE = 64
@@ -16,7 +16,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def start_server(log_level=logging.INFO, host="127.0.0.1", port=8080):
+def start_server(log_level=logging.DEBUG, host="127.0.0.1", port=8080):
     logger = logging.getLogger('server')
     logger.setLevel(log_level)
 
@@ -43,12 +43,15 @@ def start_server(log_level=logging.INFO, host="127.0.0.1", port=8080):
         command = data.decode()
 
         if command == "r":
+            statistics = {}
             data, addr = sock.recvfrom(CHUNK_SIZE)
             count = data.decode()
             print("addr", addr)
 
-            ping(count, {}, addr, sock, logger)
-            return
+            ping(count, statistics, addr, sock, logger)
+            logger.debug("statistics: {}".format(statistics))
+            sock.sendto(json.dumps(statistics).encode(), addr)
+            continue
         elif command == "x":
             pass
 
