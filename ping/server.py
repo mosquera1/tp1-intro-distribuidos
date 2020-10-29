@@ -41,19 +41,35 @@ def start_server(log_level=logging.DEBUG, host="127.0.0.1", port=8080):
         data, addr = sock.recvfrom(CHUNK_SIZE)
 
         command = data.decode()
+        statistics = {}
 
         if command == "r":
-            statistics = {}
             data, addr = sock.recvfrom(CHUNK_SIZE)
             count = data.decode()
-            print("addr", addr)
+            logger.debug("count: {}".format(count))
 
             ping(count, statistics, addr, sock, logger)
             logger.debug("statistics: {}".format(statistics))
             sock.sendto(json.dumps(statistics).encode(), addr)
             continue
         elif command == "x":
-            pass
+            logger.debug("proxy")
+            data, addr = sock.recvfrom(CHUNK_SIZE)
+            destination_host = data.decode()
+            data, addr = sock.recvfrom(CHUNK_SIZE)
+            destination_port = int(data.decode())
+            destination_address = (destination_host, destination_port)
+
+            logger.debug("destination_address: {}".format(destination_address))
+
+            data, addr = sock.recvfrom(CHUNK_SIZE)
+            count = data.decode()
+            logger.debug("count: {}, destination_address: {}".format(count, destination_address))
+
+            ping(count, statistics, destination_address, sock, logger)
+            logger.debug("statistics: {}".format(statistics))
+            sock.sendto(json.dumps(statistics).encode(), addr)
+            continue
 
         direct_server(sock, logger, data, addr)
 

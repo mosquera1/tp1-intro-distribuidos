@@ -35,8 +35,9 @@ signal.signal(signal.SIGINT, signal_handler)
 
 
 def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_host="127.0.0.1", own_port=9000,
-                 selected_type="p"):
+                 selected_type="p", destination_host="127.0.0.1", destination_port=8080):
     global statistics
+    destination_host = "127.0.0.1" if destination_host is None else destination_host
     logger = logging.getLogger('client')
     logger.setLevel(logging.DEBUG)
 
@@ -88,6 +89,20 @@ def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_
             time.sleep(1)
             i += 1
 
+        data, addr = sock.recvfrom(1000000)
+        statistics = json.loads(data.decode())
+        logger.debug(statistics)
+    else:
+        logger.debug("Proxy")
+        destination_address = (destination_host, destination_port)
+
+        logger.debug("destination_address {}".format(destination_address))
+
+        sock.sendto(destination_host.encode(), server_address)
+        sock.sendto(str(destination_port).encode(), server_address)
+
+        sock.sendto(str(0 if count is None else count).encode(), server_address)
+        #
         data, addr = sock.recvfrom(1000000)
         statistics = json.loads(data.decode())
         logger.debug(statistics)
@@ -154,7 +169,7 @@ def main():
 
     selected_types = sum([1 if x is True else 0 for x in (ping, reverse, proxy)])
 
-    has_error = (verbose and quiet) or (proxy and (destination_ip is None))
+    has_error = (verbose and quiet)
 
     if (ping is False) and (reverse is False) and (proxy is False) or (selected_types > 1):
         print(default_ping_help_text)
@@ -185,7 +200,8 @@ def main():
     while port < 9002:
         try:
             return start_client(log_level=log_level, host=server, count=count, own_host="127.0.0.1", own_port=port,
-                                selected_type=selected_type)
+                                selected_type=selected_type,
+                                destination_host=destination_ip, destination_port=int(destination_port))
         except socket.error:
             port += 1
 
