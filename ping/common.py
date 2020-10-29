@@ -7,7 +7,7 @@ def send_chunk(logger, server_address, sock, i):
     start_time = time.time()
     logger.debug("Start loop {} to address {}".format(i, server_address))
     try:
-        sock.sendto(str(CHUNK).encode(), server_address)
+        sock.sendto(str(CHUNK_SIZE).encode(), server_address)
         signal, addr = sock.recvfrom(CHUNK_SIZE)
 
         if signal.decode() != "start":
@@ -23,13 +23,13 @@ def send_chunk(logger, server_address, sock, i):
     num_bytes, addr = sock.recvfrom(CHUNK_SIZE)
     elapsed_milliseconds = round((time.time() - start_time) * 1000, 1)
 
-    logger.info("{} bytes from {} udp_seq={} time {} ms".format(num_bytes.decode(), server_address[0], i + 1,
-                                                                elapsed_milliseconds))
-
     try:
         bytes_received = int(num_bytes.decode())
     except ValueError:
         bytes_received = 0
+
+    logger.info("{} bytes from {} udp_seq={} time {} ms".format(bytes_received, server_address[0], i + 1,
+                                                                elapsed_milliseconds))
 
     return bytes_received, elapsed_milliseconds
 
@@ -66,7 +66,7 @@ def ping(count, statistics, server_address, sock, logger):
 
 
 def direct_server(sock, logger, data, addr):
-    size = len(data.decode())
+    size = int(data.decode())
     logger.info("Incoming chunk with size {} from {}".format(size, addr))
 
     bytes_received = 0
