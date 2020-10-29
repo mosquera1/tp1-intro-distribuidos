@@ -201,7 +201,8 @@ def main():
         try:
             return start_client(log_level=log_level, host=server, count=count, own_host="127.0.0.1", own_port=port,
                                 selected_type=selected_type,
-                                destination_host=destination_ip, destination_port=int(destination_port))
+                                destination_host=destination_ip,
+                                destination_port=0 if destination_port is None else int(destination_port))
         except socket.error:
             port += 1
 

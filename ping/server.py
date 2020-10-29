@@ -44,34 +44,52 @@ def start_server(log_level=logging.DEBUG, host="127.0.0.1", port=8080):
         statistics = {}
 
         if command == "r":
-            data, addr = sock.recvfrom(CHUNK_SIZE)
-            count = data.decode()
-            logger.debug("count: {}".format(count))
+            try:
+                data, addr = sock.recvfrom(CHUNK_SIZE)
+                count = data.decode()
+                logger.debug("count: {}".format(count))
 
-            ping(count, statistics, addr, sock, logger)
-            logger.debug("statistics: {}".format(statistics))
-            sock.sendto(json.dumps(statistics).encode(), addr)
+                ping(count, statistics, addr, sock, logger)
+                logger.debug("statistics: {}".format(statistics))
+                sock.sendto(json.dumps(statistics).encode(), addr)
+            except socket.error:
+                logger.error("error while sending reverse ping")
+                pass
             continue
         elif command == "x":
-            logger.debug("proxy")
-            data, addr = sock.recvfrom(CHUNK_SIZE)
-            destination_host = data.decode()
-            data, addr = sock.recvfrom(CHUNK_SIZE)
-            destination_port = int(data.decode())
-            destination_address = (destination_host, destination_port)
+            try:
+                logger.debug("proxy")
+                data, addr = sock.recvfrom(CHUNK_SIZE)
+                destination_host = data.decode()
+                data, addr = sock.recvfrom(CHUNK_SIZE)
+                destination_port = int(data.decode())
 
-            logger.debug("destination_address: {}".format(destination_address))
+                if destination_port is None:
+                    destination_port = 8080
+                if destination_host is None:
+                    destination_host = "127.0.0.1"
 
-            data, addr = sock.recvfrom(CHUNK_SIZE)
-            count = data.decode()
-            logger.debug("count: {}, destination_address: {}".format(count, destination_address))
+                destination_address = (destination_host, destination_port)
 
-            ping(count, statistics, destination_address, sock, logger)
-            logger.debug("statistics: {}".format(statistics))
-            sock.sendto(json.dumps(statistics).encode(), addr)
+                logger.debug("destination_address: {}".format(destination_address))
+
+                data, addr = sock.recvfrom(CHUNK_SIZE)
+                count = data.decode()
+                logger.debug("count: {}, destination_address: {}".format(count, destination_address))
+
+                ping(count, statistics, destination_address, sock, logger)
+                logger.debug("statistics: {}".format(statistics))
+                sock.sendto(json.dumps(statistics).encode(), addr)
+            except socket.error:
+                logger.error("error while sending proxy ping")
+                pass
+
             continue
 
-        direct_server(sock, logger, data, addr)
+        try:
+            direct_server(sock, logger, data, addr)
+        except socket.error:
+            logger.error("error while receiving direct ping")
 
 
 def main():
