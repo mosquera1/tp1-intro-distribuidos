@@ -20,9 +20,12 @@ def print_statistics():
 
     print("{} packets transmitted, {} received, {}% packet loss, time {} ms".format(statistics["count"],
                                                                                     statistics["received"],
-                                                                                    round(statistics["lost"] /
+                                                                                    100 * round(statistics["lost"] /
                                                                                           statistics["count"], 1),
                                                                                     statistics["total_time"]))
+
+    if (len(statistics["times"]) == 0):
+        return
     print("rtt min/avg/max/mdev = {}/{}/{}/{} ms".format(min(statistics["times"]),
                                                          round(sum(statistics["times"]) / len(statistics["times"]), 2),
                                                          max(statistics["times"]),
@@ -108,6 +111,7 @@ def start_client(log_level="INFO", host="127.0.0.1", port=8080, count=None, own_
 
         sock.sendto(str(0 if count is None else count).encode(), server_address)
         #
+        sock.setblocking(1)
         data, addr = sock.recvfrom(1000000)
         statistics = json.loads(data.decode())
         logger.debug(statistics)
@@ -202,7 +206,7 @@ def main():
     selected_type = "p" if ping else "r" if reverse else "x"
 
     port = 9000
-    while port < 9002:
+    while port < 9006:
         try:
             return start_client(log_level=log_level, host=server, count=count, own_host="127.0.0.1", own_port=port,
                                 selected_type=selected_type,

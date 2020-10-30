@@ -64,6 +64,14 @@ def start_server(log_level=logging.DEBUG, host="127.0.0.1", port=8080):
                 data, addr = sock.recvfrom(CHUNK_SIZE)
                 destination_port = int(data.decode())
 
+
+                my_ping_address = (host, port+1)
+                my_ping_address 
+                non_blocking = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                non_blocking.bind(my_ping_address)
+                non_blocking.setblocking(0)
+                non_blocking.settimeout(3)
+
                 if destination_port is None:
                     destination_port = 8080
                 if destination_host is None:
@@ -77,7 +85,7 @@ def start_server(log_level=logging.DEBUG, host="127.0.0.1", port=8080):
                 count = data.decode()
                 logger.debug("count: {}, destination_address: {}".format(count, destination_address))
 
-                ping(count, statistics, destination_address, sock, logger)
+                ping(count, statistics, destination_address, non_blocking, logger)
                 logger.debug("statistics: {}".format(statistics))
                 sock.sendto(json.dumps(statistics).encode(), addr)
             except socket.error:
