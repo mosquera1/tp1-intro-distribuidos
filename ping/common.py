@@ -42,6 +42,7 @@ def ping(count, statistics, server_address, sock, logger):
     logger.debug("count {}".format(count))
     statistics["lost"] = 0
     statistics["times"] = []
+    statistics["server"] = server_address[0]
 
     i = 0
 
@@ -56,13 +57,12 @@ def ping(count, statistics, server_address, sock, logger):
 
         time.sleep(1)
         i += 1
+        statistics["count"] = i
+        statistics["received"] = i - statistics["lost"]
 
-    elapsed_milliseconds = round((time.time() - start_time) * 1000, 1)
+        elapsed_milliseconds = round((time.time() - start_time) * 1000, 1)
 
-    statistics["count"] = count
-    statistics["server"] = server_address[0]
-    statistics["received"] = count - statistics["lost"]
-    statistics["total_time"] = elapsed_milliseconds
+        statistics["total_time"] = elapsed_milliseconds
 
 
 def direct_server(sock, logger, data, addr):

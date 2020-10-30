@@ -12,6 +12,9 @@ from constants import CHUNK, CHUNK_SIZE
 statistics = {}
 
 
+# sock
+
+
 def print_statistics():
     print("----statistics-----")
 
@@ -23,7 +26,9 @@ def print_statistics():
     print("rtt min/avg/max/mdev = {}/{}/{}/{} ms".format(min(statistics["times"]),
                                                          round(sum(statistics["times"]) / len(statistics["times"]), 2),
                                                          max(statistics["times"]),
-                                                         round(st.stdev(statistics["times"]), 4)))
+                                                         round(st.stdev(statistics["times"]) if len(
+                                                             statistics["times"]) > 1 else 0,
+                                                               4)))
 
 
 def signal_handler(_, __):
