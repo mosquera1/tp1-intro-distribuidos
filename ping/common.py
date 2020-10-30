@@ -12,7 +12,7 @@ def send_chunk(logger, server_address, sock, i):
 
         if signal.decode() != "start":
             logger.error("There was an error on the server")
-            return 0,0
+            exit(1)
     except socket.error:
         logger.error("couldn't connect to server")
         return 0,0
